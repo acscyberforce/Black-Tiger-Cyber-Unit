@@ -3,90 +3,305 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Black Tiger Cyber Unit - Join Us</title>
+  <title>Black Tiger Cyber Unit</title>
   <style>
     :root {
+      --neon-green: #00ff66;
       --gold: #d4af37;
-      --gold-light: #f3e5ab;
-      --black: #0d0d0d;
-      --dark-card: #181818;
-      --text: #e0e0e0;
+      --black: #050505;
+      --dark-card: rgba(8, 12, 8, 0.90);
+      --text: #00ff66;
+      --text-dim: #a0ffa0;
     }
 
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Courier New', Courier, monospace;
       background-color: var(--black);
       color: var(--text);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
     }
 
+    /* Background Video Element */
+    #bgVideo {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      z-index: -3;
+      object-fit: cover;
+      filter: brightness(0.35) contrast(1.2);
+    }
+
+    .video-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: -2;
+    }
+
+    /* Matrix Rain Canvas */
+    #matrixCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    /* Hacker Intro Screen Overlay */
+    #introScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(3, 5, 3, 0.96);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+      transition: opacity 1s cubic-bezier(0.19, 1, 0.22, 1), visibility 1s ease;
+    }
+
+    /* Scanline Effect */
+    #introScreen::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      z-index: 10000;
+      background-size: 100% 3px, 3px 100%;
+      pointer-events: none;
+    }
+
+    .intro-terminal {
+      max-width: 700px;
+      width: 100%;
+      border: 1px solid rgba(0, 255, 102, 0.3);
+      padding: 30px;
+      background: rgba(0, 10, 2, 0.85);
+      box-shadow: 0 0 30px rgba(0, 255, 102, 0.2), inset 0 0 15px rgba(0, 255, 102, 0.1);
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px dashed rgba(0, 255, 102, 0.3);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: #88ffaa;
+    }
+
+    .glitch-text {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--neon-green);
+      text-shadow: 0 0 8px var(--neon-green);
+      margin-bottom: 30px;
+      min-height: 140px;
+      line-height: 1.8;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 18px;
+      background-color: var(--neon-green);
+      animation: blink 0.8s infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .enter-btn {
+      position: relative;
+      padding: 16px 40px;
+      background: rgba(0, 255, 102, 0.05);
+      color: var(--neon-green);
+      border: 2px solid var(--neon-green);
+      border-radius: 4px;
+      font-size: 18px;
+      font-weight: bold;
+      font-family: 'Courier New', Courier, monospace;
+      cursor: pointer;
+      letter-spacing: 3px;
+      box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(30px) scale(0.9);
+      outline: none;
+      overflow: hidden;
+    }
+
+    .enter-btn.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      animation: pulseBtn 2s infinite alternate;
+    }
+
+    @keyframes pulseBtn {
+      0% { box-shadow: 0 0 15px rgba(0, 255, 102, 0.4); }
+      100% { box-shadow: 0 0 35px rgba(0, 255, 102, 0.9), inset 0 0 15px rgba(0, 255, 102, 0.4); }
+    }
+
+    .enter-btn:hover {
+      background-color: var(--neon-green);
+      color: var(--black);
+      box-shadow: 0 0 40px var(--neon-green);
+      transform: scale(1.05);
+    }
+
+    /* Main Container Form */
     .container {
       width: 100%;
       max-width: 600px;
       margin: 20px;
       padding: 30px;
       background-color: var(--dark-card);
-      border: 2px solid var(--gold);
+      border: 1px solid var(--neon-green);
       border-radius: 12px;
-      box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+      box-shadow: 0 0 20px rgba(0, 255, 102, 0.25), inset 0 0 15px rgba(0, 255, 102, 0.1);
+      backdrop-filter: blur(8px);
+      box-sizing: border-box;
+      position: relative;
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      display: none;
     }
 
+    .container.active {
+      display: block;
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Hacker Logo Section */
     .logo-container {
       text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+      position: relative;
+      width: 100%;
+    }
+
+    .logo-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      padding: 5px;
+      border: 2px dashed var(--neon-green);
+      box-sizing: border-box;
+      overflow: hidden;
+      background-color: #000;
     }
 
     .logo-container img {
-      width: 100px;
-      height: auto;
+      width: 100%;
+      height: 100%;
       border-radius: 50%;
-      border: 2px solid var(--gold);
+      object-fit: cover;
+      display: block;
+      box-shadow: 0 0 15px var(--neon-green);
+    }
+
+    .logo-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--neon-green);
+      box-shadow: 0 0 10px var(--neon-green);
+      animation: scanLogo 2.5s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes scanLogo {
+      0% { top: 5%; opacity: 0.2; }
+      50% { opacity: 1; }
+      100% { top: 90%; opacity: 0.2; }
     }
 
     h1 {
       text-align: center;
-      color: var(--gold);
-      margin-bottom: 10px;
+      color: var(--neon-green);
+      margin-bottom: 5px;
       font-size: 24px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(0, 255, 102, 0.8), 0 0 20px rgba(0, 255, 102, 0.4);
     }
 
     p.subtitle {
       text-align: center;
-      color: #888;
-      font-size: 14px;
+      color: #88ffaa;
+      font-size: 13px;
       margin-bottom: 25px;
+      letter-spacing: 1px;
     }
 
+    /* Rules Section (Typing Animation Box) */
     .rules-section {
-      background-color: #222;
-      border-left: 4px solid var(--gold);
-      padding: 15px;
-      border-radius: 5px;
+      background-color: rgba(0, 20, 5, 0.85);
+      border-left: 4px solid var(--neon-green);
+      border-right: 1px solid rgba(0, 255, 102, 0.2);
+      padding: 18px 20px;
+      border-radius: 6px;
       margin-bottom: 25px;
+      box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.05);
     }
 
     .rules-section h3 {
       margin-top: 0;
-      color: var(--gold);
-      font-size: 16px;
+      color: var(--neon-green);
+      font-size: 15px;
+      text-shadow: 0 0 5px var(--neon-green);
+      margin-bottom: 12px;
     }
 
-    .rules-section ul {
-      margin: 0;
-      padding-left: 20px;
-      font-size: 14px;
-      color: #ccc;
-    }
-
-    .rules-section li {
-      margin-bottom: 5px;
+    .rules-typing-box {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      min-height: 180px;
+      white-space: pre-wrap;
     }
 
     .form-group {
@@ -96,9 +311,10 @@
     label {
       display: block;
       margin-bottom: 6px;
-      color: var(--gold-light);
-      font-size: 14px;
-      font-weight: 500;
+      color: var(--neon-green);
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 1px;
     }
 
     input[type="text"],
@@ -109,17 +325,20 @@
     textarea {
       width: 100%;
       padding: 10px 12px;
-      border: 1px solid #444;
-      background-color: #252525;
-      color: #fff;
-      border-radius: 6px;
+      border: 1px solid #005522;
+      background-color: rgba(0, 15, 5, 0.9);
+      color: #00ff66;
+      border-radius: 4px;
       box-sizing: border-box;
       font-size: 14px;
+      font-family: 'Courier New', Courier, monospace;
       outline: none;
+      transition: all 0.3s;
     }
 
     input:focus, textarea:focus {
-      border-color: var(--gold);
+      border-color: var(--neon-green);
+      box-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
     }
 
     textarea {
@@ -144,19 +363,21 @@
       display: block;
       text-align: center;
       padding: 10px;
-      background-color: #252525;
-      border: 1px solid #444;
-      border-radius: 6px;
+      background-color: rgba(0, 15, 5, 0.9);
+      border: 1px solid #005522;
+      border-radius: 4px;
       cursor: pointer;
-      color: #fff;
+      color: var(--text-dim);
       transition: all 0.3s;
+      font-weight: bold;
     }
 
     .radio-option input[type="radio"]:checked + label {
-      background-color: var(--gold);
+      background-color: var(--neon-green);
       color: var(--black);
       font-weight: bold;
-      border-color: var(--gold);
+      border-color: var(--neon-green);
+      box-shadow: 0 0 10px var(--neon-green);
     }
 
     .file-input-wrapper {
@@ -167,23 +388,25 @@
     }
 
     .file-input-btn {
-      border: 2px dashed var(--gold);
-      color: var(--gold);
-      background-color: #252525;
+      border: 1px dashed var(--neon-green);
+      color: var(--neon-green);
+      background-color: rgba(0, 15, 5, 0.9);
       padding: 12px;
-      border-radius: 6px;
-      font-size: 14px;
+      border-radius: 4px;
+      font-size: 13px;
       font-weight: bold;
       width: 100%;
       text-align: center;
       box-sizing: border-box;
       cursor: pointer;
       display: block;
-      transition: background 0.3s;
+      transition: all 0.3s;
+      font-family: 'Courier New', Courier, monospace;
     }
 
     .file-input-btn:hover {
-      background-color: #333;
+      background-color: rgba(0, 35, 10, 0.9);
+      box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
     }
 
     .file-input-wrapper input[type=file] {
@@ -193,29 +416,31 @@
       top: 0;
       opacity: 0;
       cursor: pointer;
+      height: 100%;
+      width: 100%;
     }
 
     .submit-btn {
       width: 100%;
       padding: 12px;
-      background-color: var(--gold);
-      color: var(--black);
-      border: none;
-      border-radius: 6px;
+      background-color: transparent;
+      color: var(--neon-green);
+      border: 1px solid var(--neon-green);
+      border-radius: 4px;
       font-size: 16px;
       font-weight: bold;
+      font-family: 'Courier New', Courier, monospace;
       cursor: pointer;
-      transition: opacity 0.3s;
+      transition: all 0.3s;
       margin-top: 10px;
+      letter-spacing: 2px;
+      box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
     }
 
     .submit-btn:hover {
-      opacity: 0.9;
-    }
-
-    .submit-btn:disabled {
-      background-color: #666;
-      cursor: not-allowed;
+      background-color: var(--neon-green);
+      color: var(--black);
+      box-shadow: 0 0 20px var(--neon-green);
     }
 
     .social-links {
@@ -223,80 +448,100 @@
       justify-content: space-around;
       margin-top: 25px;
       padding-top: 20px;
-      border-top: 1px solid #333;
+      border-top: 1px solid rgba(0, 255, 102, 0.2);
     }
 
     .social-links a {
-      color: var(--gold);
+      color: var(--neon-green);
       text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      transition: color 0.3s;
+      font-size: 13px;
+      font-weight: bold;
+      transition: all 0.3s;
     }
 
     .social-links a:hover {
       color: #fff;
+      text-shadow: 0 0 8px var(--neon-green);
     }
   </style>
 </head>
-<body>
+<body onclick="enableVoiceAudio()">
 
-  <div class="container">
+  <!-- Background Video Element -->
+  <video autoplay muted loop playsinline id="bgVideo">
+    <source src="https://files.catbox.moe/ttx4if.mp4" type="video/mp4">
+  </video>
+  <div class="video-overlay"></div>
+
+  <!-- Matrix Background Canvas -->
+  <canvas id="matrixCanvas"></canvas>
+
+  <!-- Hacker Intro Screen Overlay -->
+  <div id="introScreen">
+    <div class="intro-terminal">
+      <div class="terminal-header">
+        <div>THE CYBER SECURITY // EXPART TONMOY</div>
+      </div>
+      <div class="glitch-text"><span id="typewriterText"></span><span class="cursor"></span></div>
+      <button class="enter-btn" id="enterBtn" onclick="enterSystem()">JOIN NOW</button>
+    </div>
+  </div>
+
+  <!-- Main System Form Container -->
+  <div class="container" id="mainContainer">
     <div class="logo-container">
-      
+      <div class="logo-wrapper">
+        <img id="appLogo" src="https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=300&q=80" alt="Black Tiger Cyber Unit Logo">
+      </div>
     </div>
 
     <h1>Black Tiger Cyber Unit</h1>
-    <p class="subtitle">অফিসিয়াল টিম মেম্বার রিক্রুটমেন্ট ফর্ম</p>
+    <p class="subtitle">[ SYSTEM ADMISSION FORM ]</p>
 
+    <!-- Typing Animation Rules Section -->
     <div class="rules-section">
-      <h3>⚠️ টিমের নিয়মাবলী (Rules)</h3>
-      <ul>
-        <li>টিমের অভ্যন্তরীন কোনো গোপন তথ্য বাইরে প্রকাশ করা সম্পূর্ণ নিষেধ।</li>
-        <li>সব সময় টিমের সিনিয়র ও সহকর্মীদের প্রতি সম্মান বজায় রাখতে হবে।</li>
-        <li>কোনো প্রকার অবৈধ বা ক্ষতিকারক কাজে টিমের নাম ব্যবহার করা যাবে না।</li>
-        <li>টিমের মিটিং ও যেকোনো অ্যাক্টিভিটিতে সক্রিয় থাকতে হবে।</li>
-      </ul>
+      <h3>⚠️ টিমের পরিচালনা ও আচরণগত নিয়মাবলী (Rules)</h3>
+      <div class="rules-typing-box"><span id="rulesText"></span><span class="cursor"></span></div>
     </div>
 
     <form id="joinForm">
       <div class="form-group">
-        <label for="name">নাম</label>
+        <label for="name">> নাম (Name)</label>
         <input type="text" id="name" required placeholder="আপনার পূর্ণ নাম লিখুন">
       </div>
 
       <div class="form-group">
-        <label for="age">বয়স</label>
+        <label for="age">> বয়স (Age)</label>
         <input type="number" id="age" required placeholder="আপনার বয়স">
       </div>
 
       <div class="form-group">
-        <label for="dob">জন্ম তারিখ</label>
+        <label for="dob">> জন্ম তারিখ (Date of Birth)</label>
         <input type="date" id="dob" required>
       </div>
 
       <div class="form-group">
-        <label for="address">ঠিকানা (স্থায়ী)</label>
+        <label for="address">> ঠিকানা (Permanent Address)</label>
         <input type="text" id="address" required placeholder="স্থায়ী ঠিকানা">
       </div>
 
       <div class="form-group">
-        <label for="current_address">বর্তমান ঠিকানা</label>
+        <label for="current_address">> বর্তমান ঠিকানা (Current Address)</label>
         <input type="text" id="current_address" required placeholder="বর্তমান ঠিকানা">
       </div>
 
       <div class="form-group">
-        <label for="phone">আপনার মোবাইল নম্বর</label>
+        <label for="phone">> আপনার মোবাইল নম্বর (Phone)</label>
         <input type="tel" id="phone" required placeholder="017xxxxxxxx">
       </div>
 
       <div class="form-group">
-        <label for="email">আপনার ইমেইল</label>
+        <label for="email">> আপনার ইমেইল (Email)</label>
         <input type="email" id="email" required placeholder="example@gmail.com">
       </div>
 
       <div class="form-group">
-        <label>আগে কোনো টিমে ছিলেন?</label>
+        <label>> আগে কোনো টিমে ছিলেন? (Previous Team)</label>
         <div class="radio-group">
           <div class="radio-option">
             <input type="radio" id="prev_team_yes" name="previous_team" value="হ্যাঁ">
@@ -310,29 +555,182 @@
       </div>
 
       <div class="form-group">
-        <label for="reason">আপনি কেন Join হচ্ছেন?</label>
+        <label for="reason">> আপনি কেন Join হচ্ছেন? (Reason)</label>
         <textarea id="reason" required placeholder="সংক্ষেপে আপনার কারণ লিখুন..."></textarea>
       </div>
 
       <div class="form-group">
-        <label>ছবি আপলোড করুন</label>
+        <label>> ছবি আপলোড করুন (Upload Image)</label>
         <div class="file-input-wrapper">
           <button class="file-input-btn" type="button" id="fileLabel">📸 ছবি তুলে দিন / পিক আপলোড করুন</button>
           <input type="file" id="photo" accept="image/*" capture="user" onchange="updateFileName(this)">
         </div>
       </div>
 
-      <button type="submit" class="submit-btn" id="submitBtn">JOIN NOW</button>
+      <button type="submit" class="submit-btn" id="submitBtn">EXECUTE // JOIN NOW</button>
     </form>
 
     <div class="social-links">
-      <a href="#" target="_blank">Telegram</a>
-      <a href="#" target="_blank">Facebook Page</a>
-      <a href="#" target="_blank">Facebook Group</a>
+      <a href="#" target="_blank">[ TELEGRAM ]</a>
+      <a href="#" target="_blank">[ FB PAGE ]</a>
+      <a href="#" target="_blank">[ FB GROUP ]</a>
     </div>
   </div>
 
   <script>
+    /* Background Voice Synth Engine */
+    let audioPlayed = false;
+    function speakHackerVoice() {
+      if ('speechSynthesis' in window && !audioPlayed) {
+        window.speechSynthesis.cancel();
+        const textToSpeak = "WELCOME TO BLACK TIGER CYBER UNIT. THIS TEAM OWNER MUHAMMAD TONMOY. C.E.O IMRAN MALLIK.";
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.rate = 0.88;
+        utterance.pitch = 0.8;
+        utterance.lang = 'en-US';
+        
+        window.speechSynthesis.speak(utterance);
+        audioPlayed = true;
+      }
+    }
+
+    function enableVoiceAudio() {
+      speakHackerVoice();
+    }
+
+    /* Matrix Rain Canvas */
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%";
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = [];
+
+    for (let x = 0; x < columns; x++) {
+      drops[x] = 1;
+    }
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#00ff66";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars.charAt(Math.floor(Math.random() * chars.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+    setInterval(drawMatrix, 33);
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    /* Typewriter Intro Script Sequence */
+    const textSequence = [
+      "     আসসালামু আলাইকুম",
+      " WELCOME TO BLACK TIGER CYBER UNIT",
+      " TEAM OWNER: MUHAMMAD TONMOY",
+      " TEAM CEO: IMRAN MALLIK",
+      " HELLO WORLD, I'M FROM BANGLADESH HACKER."
+    ];
+
+    const typewriterElement = document.getElementById('typewriterText');
+    const enterBtn = document.getElementById('enterBtn');
+    let lineIndex = 0;
+    let charIndex = 0;
+
+    function typeLine() {
+      if (lineIndex < textSequence.length) {
+        let currentLine = textSequence[lineIndex];
+        
+        if (charIndex < currentLine.length) {
+          typewriterElement.innerHTML += currentLine.charAt(charIndex);
+          charIndex++;
+          setTimeout(typeLine, 35);
+        } else {
+          typewriterElement.innerHTML += "<br>";
+          lineIndex++;
+          charIndex = 0;
+          setTimeout(typeLine, 280);
+        }
+      } else {
+        enterBtn.classList.add('show');
+      }
+    }
+
+    /* Rules Typing Animation Sequence (Fixed Array Mismatch) */
+    const teamRules = [
+      "1. 🔒 [গোপনীয়তা ও তথ্য সুরক্ষা] Black Tiger Cyber Unit (BTCU)-এর সকল তথ্য, ডকুমেন্ট, সোর্স কোড, টুল, সার্ভার, লগইন তথ্য, গবেষণা, অপারেশন এবং চলমান বা ভবিষ্যৎ প্রজেক্ট সম্পূর্ণ গোপনীয়। অ্যাডমিনের লিখিত অনুমতি ছাড়া কোনো তথ্য, স্ক্রিনশট, ভিডিও, ফাইল বা আলোচনা বাইরের ব্যক্তি, গ্রুপ বা সোশ্যাল মিডিয়ায় শেয়ার করা সম্পূর্ণ নিষিদ্ধ।",
+      "2. 🫡 [সম্মান ও পেশাদার আচরণ] প্রতিটি সদস্যকে অ্যাডমিন, সিনিয়র, মডারেটর ও সহকর্মীদের প্রতি সর্বোচ্চ সম্মান, ভদ্রতা এবং পেশাদার আচরণ বজায় রাখতে হবে। অপমানজনক ভাষা, ব্যক্তিগত আক্রমণ, অশালীন মন্তব্য, অকারণ তর্ক-বিতর্ক বা টিমের পরিবেশ নষ্ট করে এমন কোনো আচরণ গ্রহণযোগ্য নয়।",
+      "3. ⚖️ [আইন, নৈতিকতা ও দায়িত্ব] টিমের নাম, লোগো, পরিচয় বা রিসোর্স ব্যবহার করে কোনো অবৈধ, প্রতারণামূলক, ক্ষতিকর বা আইনবিরোধী কার্যক্রম পরিচালনা করা সম্পূর্ণ নিষিদ্ধ। প্রত্যেক সদস্যকে স্থানীয় ও আন্তর্জাতিক সাইবার আইন এবং নৈতিকতার প্রতি সম্মান প্রদর্শন করতে হবে।",
+      "4. 📚 [সক্রিয়তা ও দক্ষতা উন্নয়ন] প্রত্যেক সদস্যকে নিয়মিত টিম মিটিং, ট্রেনিং, ওয়ার্কশপ, অ্যাসাইনমেন্ট এবং গবেষণামূলক কার্যক্রমে অংশগ্রহণ করতে হবে। দীর্ঘ সময় কোনো কারণ ছাড়া নিষ্ক্রিয় থাকলে সদস্যপদ পর্যালোচনা করা হতে পারে।",
+      "5. 🛡️ [অনুমতি ও অফিসিয়াল কার্যক্রম] টিমের পক্ষ থেকে কোনো ঘোষণা, পাবলিক পোস্ট, প্রজেক্ট প্রকাশ, পার্টনারশিপ, প্রতিযোগিতায় অংশগ্রহণ বা মিডিয়ার সাথে যোগাযোগ করার আগে অবশ্যই অ্যাডমিনের অনুমতি গ্রহণ করতে হবে। অনুমতি ছাড়া টিমের প্রতিনিধিত্ব করা যাবে না।",
+      "6. 💻 [রিসোর্সের সঠিক ব্যবহার] টিমের সার্ভার, রিপোজিটরি, টুল, সফটওয়্যার, ডাটাবেস, API, ডিজিটাল অ্যাসেট বা অন্য যেকোনো রিসোর্স শুধুমাত্র টিমের অনুমোদিত কাজের জন্য ব্যবহার করতে হবে। ব্যক্তিগত লাভ, অননুমোদিত অ্যাক্সেস বা অপব্যবহার কঠোরভাবে নিষিদ্ধ।",
+      "7. 🤝 [ঐক্য ও সহযোগিতা] BTCU একটি পরিবার। সকল সদস্যকে একে অপরকে সহযোগিতা করতে হবে, জ্ঞান ভাগাভাগি করতে হবে এবং টিমের উন্নয়নের জন্য একসাথে কাজ করতে হবে। অভ্যন্তরীণ দ্বন্দ্ব বা মতবিরোধ হলে তা অ্যাডমিনের মাধ্যমে সমাধান করতে হবে।",
+      "8. 🚫 [ভুয়া পরিচয় ও প্রতারণা নিষিদ্ধ] কোনো সদস্য টিমের পরিচয় ব্যবহার করে অর্থ সংগ্রহ, প্রতারণা, ভুয়া পরিচয় প্রদান, অন্যের অ্যাকাউন্ট ব্যবহার বা বিভ্রান্তিকর তথ্য প্রচার করতে পারবে না। এমন প্রমাণ পাওয়া গেলে তাৎক্ষণিকভাবে সদস্যপদ বাতিল করা হবে।",
+      "9. 📢 [যোগাযোগের শৃঙ্খলা] টিমের অফিসিয়াল গ্রুপ, সার্ভার বা যোগাযোগ মাধ্যম শুধুমাত্র প্রয়োজনীয় আলোচনা, শিক্ষা, গবেষণা ও অফিসিয়াল তথ্য বিনিময়ের জন্য ব্যবহার করতে হবে। স্প্যাম, অপ্রয়োজনীয় প্রচারণা, গুজব বা বিভ্রান্তিকর তথ্য প্রচার করা যাবে না।",
+      "10. ⚠️ [শাস্তিমূলক ব্যবস্থা] উপরোক্ত যেকোনো নিয়ম লঙ্ঘন, গোপনীয় তথ্য ফাঁস, টিমের সুনাম ক্ষুণ্ন করা, টিমের বিরুদ্ধে ষড়যন্ত্র, রিসোর্স অপব্যবহার বা বারবার শৃঙ্খলাভঙ্গের ক্ষেত্রে অ্যাডমিন কর্তৃপক্ষ সতর্কতা, সাময়িক সাসপেনশন অথবা স্থায়ীভাবে সদস্যপদ বাতিল করার পূর্ণ অধিকার সংরক্ষণ করে। BTCU-এর সিদ্ধান্তই চূড়ান্ত এবং সকল সদস্যের জন্য বাধ্যতামূলক।"
+    ];
+
+    const rulesTextElement = document.getElementById('rulesText');
+    let rLineIndex = 0;
+    let rCharIndex = 0;
+
+    function startRulesTyping() {
+      if (rLineIndex < teamRules.length) {
+        let currentRule = teamRules[rLineIndex];
+        if (rCharIndex < currentRule.length) {
+          rulesTextElement.innerHTML += currentRule.charAt(rCharIndex);
+          rCharIndex++;
+          setTimeout(startRulesTyping, 15); // Type speed adjusted
+        } else {
+          rulesTextElement.innerHTML += "<br><br>";
+          rLineIndex++;
+          rCharIndex = 0;
+          setTimeout(startRulesTyping, 150);
+        }
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        typeLine();
+        speakHackerVoice();
+      }, 500);
+    });
+
+    function enterSystem() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      
+      const intro = document.getElementById('introScreen');
+      const mainForm = document.getElementById('mainContainer');
+
+      intro.style.opacity = '0';
+      intro.style.visibility = 'hidden';
+
+      setTimeout(() => {
+        intro.style.display = 'none';
+        mainForm.classList.add('active');
+        startRulesTyping(); // Start typing rules correctly
+      }, 500);
+    }
+
+    /* Form Functions */
     function updateFileName(input) {
       const fileLabel = document.getElementById('fileLabel');
       if (input.files && input.files[0]) {
@@ -340,11 +738,10 @@
       }
     }
 
-    // server.txt থেকে BOT_TOKEN এবং CHAT_ID নেওয়ার ফাংশন
     async function getServerCredentials() {
       try {
         const response = await fetch('server.txt');
-        if (!response.ok) throw new Error('server.txt ফাইলটি পাওয়া যায়নি');
+        if (!response.ok) throw new Error('server.txt ফাইলটি পাওয়া যায়নি');
         
         const text = await response.text();
         const credentials = {};
@@ -367,96 +764,84 @@
       e.preventDefault();
 
       const submitBtn = document.getElementById('submitBtn');
-      submitBtn.innerText = "পাঠানো হচ্ছে...";
+      submitBtn.innerText = "SENDING DATA...";
       submitBtn.disabled = true;
 
-      // server.txt থেকে ডাটা রিড করা
-      const creds = await getServerCredentials();
-      if (!creds || !creds.BOT_TOKEN || !creds.CHAT_ID) {
-        alert('server.txt ফাইল থেকে Token বা Chat ID সেট করা সম্ভব হয়নি!');
-        submitBtn.innerText = "JOIN NOW";
-        submitBtn.disabled = false;
-        return;
-      }
-
-      const BOT_TOKEN = creds.BOT_TOKEN;
-      const CHAT_ID = creds.CHAT_ID;
-
-      const name = document.getElementById('name').value;
-      const age = document.getElementById('age').value;
-      const dob = document.getElementById('dob').value;
-      const address = document.getElementById('address').value;
-      const currentAddress = document.getElementById('current_address').value;
-      const phone = document.getElementById('phone').value;
-      const email = document.getElementById('email').value;
-      const prevTeam = document.querySelector('input[name="previous_team"]:checked').value;
-      const reason = document.getElementById('reason').value;
-      const photoInput = document.getElementById('photo');
-
-      const captionMessage = 
-`🔥 *BLACK TIGER CYBER UNIT NEW AD MENTION* 🔥
-
-👤 *নাম:* ${name}
-🎂 *বয়স:* ${age}
-📅 *জন্ম তারিখ:* ${dob}
-🏠 *স্থায়ী ঠিকানা:* ${address}
-📍 *বর্তমান ঠিকানা:* ${currentAddress}
-📞 *মোবাইল:* ${phone}
-✉️ *ইমেইল:* ${email}
-🛡️ *আগে কোনো টিমে ছিলেন:* ${prevTeam}
-📝 *কারণ:* ${reason}`;
-
       try {
+        const creds = await getServerCredentials();
+        if (!creds || !creds.BOT_TOKEN || !creds.CHAT_ID) {
+          alert('server.txt ফাইল থেকে Token বা Chat ID পাওয়া যায়নি!');
+          return;
+        }
+
+        const BOT_TOKEN = creds.BOT_TOKEN;
+        const CHAT_ID = creds.CHAT_ID;
+
+        const name = document.getElementById('name').value;
+        const age = document.getElementById('age').value;
+        const dob = document.getElementById('dob').value;
+        const address = document.getElementById('address').value;
+        const currentAddress = document.getElementById('current_address').value;
+        const phone = document.getElementById('phone').value;
+        const email = document.getElementById('email').value;
+        const prevTeam = document.querySelector('input[name="previous_team"]:checked').value;
+        const reason = document.getElementById('reason').value;
+        const photoInput = document.getElementById('photo');
+
+        const captionMessage = 
+`🔥 BLACK TIGER CYBER UNIT NEW MEMBER 🔥
+
+👤 নাম: ${name}
+🎂 বয়স: ${age}
+📅 জন্ম তারিখ: ${dob}
+🏠 স্থায়ী ঠিকানা: ${address}
+📍 বর্তমান ঠিকানা: ${currentAddress}
+📞 মোবাইল: ${phone}
+✉️ ইমেইল: ${email}
+🛡️ আগে কোনো টিমে ছিলেন: ${prevTeam}
+📝 কারণ: ${reason}`;
+
+        let response;
         if (photoInput.files && photoInput.files[0]) {
           const formData = new FormData();
           formData.append("chat_id", CHAT_ID);
           formData.append("caption", captionMessage);
-          formData.append("parse_mode", "Markdown");
           formData.append("photo", photoInput.files[0]);
 
-          const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+          response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
             method: "POST",
             body: formData
           });
-
-          const result = await response.json();
-
-          if (result.ok) {
-            alert('আপনার আবেদন সফলভাবে জমা দেওয়া হয়েছে!');
-            document.getElementById('joinForm').reset();
-            document.getElementById('fileLabel').innerText = "📸 ছবি তুলে দিন / পিক আপলোড করুন";
-          } else {
-            alert('আবেদন পাঠাতে ব্যর্থ হয়েছে! server.txt ফাইলের Token বা Chat ID সঠিক কিনা দেখুন।');
-          }
         } else {
-          const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               chat_id: CHAT_ID,
-              text: captionMessage,
-              parse_mode: "Markdown"
+              text: captionMessage
             })
           });
-
-          const result = await response.json();
-
-          if (result.ok) {
-            alert('আপনার আবেদন সফলভাবে জমা দেওয়া হয়েছে!');
-            document.getElementById('joinForm').reset();
-          } else {
-            alert('আবেদন পাঠাতে ব্যর্থ হয়েছে!');
-          }
         }
+
+        const result = await response.json();
+
+        if (result.ok) {
+          alert('আপনার আবেদন সফলভাবে জমা দেওয়া হয়েছে!');
+          document.getElementById('joinForm').reset();
+          document.getElementById('fileLabel').innerText = "📸 ছবি তুলে দিন / পিক আপলোড করুন";
+        } else {
+          alert('আবেদন পাঠাতে ব্যর্থ হয়েছে! Error: ' + (result.description || 'Unknown Error'));
+        }
+
       } catch (error) {
         console.error("Error:", error);
-        alert('ইন্টারনেট বা সার্ভারে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+        alert('নেটওয়ার্ক বা সার্ভারে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
       } finally {
-        submitBtn.innerText = "JOIN NOW";
+        submitBtn.innerText = "EXECUTE // JOIN NOW";
         submitBtn.disabled = false;
       }
     });
   </script>
 
 </body>
-</html>
+                                      </html>
